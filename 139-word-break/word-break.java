@@ -1,6 +1,5 @@
 class Solution {
     public boolean wordBreak(String s, List<String> wordDict) {
-        // Create a set from the word dictionary for efficient look-up
         Set<String> wordSet = new HashSet<>(wordDict);
         int strLength = s.length();
         
@@ -11,14 +10,13 @@ class Solution {
         // Iterate over the length of the string
         for (int i = 1; i <= strLength; i++) {
             // Check every substring ending at index i
-            for (int j = 0; j < i; j++) {
-                // If the substring s[j:i] is in the dictionary and s[0:j] can be segmented
+            for (int j = Math.max(0, i - 20); j < i; j++) { // Limit j to the last 20 characters
                 if (dp[j] && wordSet.contains(s.substring(j, i))) {
                     dp[i] = true;
                     break; // No need to check further if we found a valid segmentation
                 }
             }
         }
-        return dp[strLength]; // Return whether the entire string can be segmented
+         return dp[strLength]; // Return whether the entire string can be segmented
     }
 }
