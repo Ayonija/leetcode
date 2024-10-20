@@ -1,33 +1,57 @@
 class Solution {
     public List<List<Integer>> pacificAtlantic(int[][] heights) {
-        int rows = heights.length, cols = heights[0].length;
-        boolean[][] pac = new boolean[rows][cols];
-        boolean[][] atl = new boolean[rows][cols];
-        
-        for (int col = 0; col< cols; col++){
-            dfs(0, col, rows, cols, pac, heights[0][col], heights);
-            dfs(rows-1, col,rows, cols, atl, heights[rows-1][col], heights);
+        if (heights == null || heights.length == 0 || heights[0].length == 0) {
+            return new ArrayList<>();
         }
-        for (int row = 0; row<rows; row++){
-            dfs(row, 0,rows, cols, pac, heights[row][0], heights);
-            dfs(row, cols-1,rows, cols, atl, heights[row][cols-1], heights);
+
+        int rows = heights.length;
+        int cols = heights[0].length;
+        boolean[][] pacific = new boolean[rows][cols];
+        boolean[][] atlantic = new boolean[rows][cols];
+
+        // Perform DFS from Pacific Ocean (top and left edges)
+        for (int i = 0; i < rows; i++) {
+            dfs(heights, pacific, i, 0);
+            dfs(heights, atlantic, i, cols - 1);
         }
-        List<List<Integer>> result = new ArrayList<List<Integer>>();
-        for (int i = 0; i < rows; i++)
-            for (int j = 0; j < cols; j++){
-                if (pac[i][j] && atl[i][j])
-                    result.add(Arrays.asList(i,j));
+        // Perform DFS from Atlantic Ocean (bottom and right edges)
+        for (int j = 0; j < cols; j++) {
+            dfs(heights, pacific, 0, j);
+            dfs(heights, atlantic, rows - 1, j);
+        }
+
+        // Collect results where both oceans can be reached
+        List<List<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (pacific[i][j] && atlantic[i][j]) {
+                    List<Integer> cell = new ArrayList<>();
+                    cell.add(i);
+                    cell.add(j);
+                    result.add(cell);
+                }
             }
+        }
+
         return result;
     }
-    private void dfs(int row, int col, int rows, int cols, boolean[][] visited, int prevHeight, int[][] heights){
-        if (row < 0 || row >= rows || col < 0 || col >= cols || visited[row][col] || prevHeight > heights[row][col])
-            return;
-        visited[row][col]= true;
-        dfs(row+1, col, rows, cols, visited, heights[row][col], heights);
-        dfs(row-1, col, rows, cols, visited, heights[row][col], heights);
-        dfs(row, col+1, rows, cols, visited, heights[row][col], heights);
-        dfs(row, col-1, rows, cols, visited, heights[row][col], heights);
+
+    private static void dfs(int[][] heights, boolean[][] visited, int x, int y) {
+        visited[x][y] = true;
+
+        // Directions for moving up, down, left, or right
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         
+        for (int[] dir : directions) {
+            int newX = x + dir[0];
+            int newY = y + dir[1];
+
+            // Check bounds and height condition
+            if (newX >= 0 && newX < heights.length && newY >= 0 && newY < heights[0].length &&
+                !visited[newX][newY] && heights[newX][newY] >= heights[x][y]) {
+                
+                dfs(heights, visited, newX, newY); // Recursive call
+            }
+        }
     }
 }
